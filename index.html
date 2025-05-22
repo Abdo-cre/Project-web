@@ -1,0 +1,227 @@
+
+<html lang="en">
+<head>
+    <title>Unit Conversion Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-blue-100 to-purple-100 flex justify-center items-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl transition-transform hover:scale-105">
+        <h1 class="text-2xl font-semibold text-blue-600 text-center mb-6">Unit Converter</h1>
+        <div class="mb-4">
+            <label for="conversionType" class="block text-gray-700 text-sm font-bold mb-2">Conversion Type:</label>
+            <select id="conversionType" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="speed">Speed</option>
+                <option value="area">Area</option>
+                <option value="distance">Distance</option>
+                <option value="time">Time</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="inputValue" class="block text-gray-700 text-sm font-bold mb-2">Value:</label>
+            <input type="number" id="inputValue" placeholder="Enter value" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div class="mb-4">
+            <label for="fromUnit" class="block text-gray-700 text-sm font-bold mb-2">From Unit:</label>
+            <select id="fromUnit" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="toUnit" class="block text-gray-700 text-sm font-bold mb-2">To Unit:</label>
+            <select id="toUnit" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </select>
+        </div>
+        <div class="flex items-center justify-center">
+            <button id="convertButton" class="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-md focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">Convert</button>
+        </div>
+        <div id="result" class="mt-6 text-xl text-center text-indigo-600 font-semibold"></div>
+    </div>
+
+    <script>
+        const conversionTypeSelect = document.getElementById("conversionType");
+        const inputValueInput = document.getElementById("inputValue");
+        const fromUnitSelect = document.getElementById("fromUnit");
+        const toUnitSelect = document.getElementById("toUnit");
+        const convertButton = document.getElementById("convertButton");
+        const resultDiv = document.getElementById("result");
+
+        const units = {
+            speed: [
+                { name: "Meter per second (m/s)", value: "m/s" },
+                { name: "Kilometer per hour (km/h)", value: "km/h" },
+                { name: "Mile per hour (mph)", value: "mph" },
+                { name: "Knot (kn)", value: "kn" },
+            ],
+            area: [
+                { name: "Square meter (m²)", value: "m²" },
+                { name: "Square kilometer (km²)", value: "km²" },
+                { name: "Square mile (mi²)", value: "mi²" },
+                { name: "Hectare (ha)", value: "ha" },
+                { name: "Acre (ac)", value: "ac" },
+            ],
+            distance: [
+                { name: "Meter (m)", value: "m" },
+                { name: "Kilometer (km)", value: "km" },
+                { name: "Mile (mi)", value: "mi" },
+                { name: "Centimeter (cm)", value: "cm" },
+                { name: "Millimeter (mm)", value: "mm" },
+            ],
+            time: [
+                { name: "Second (s)", value: "s" },
+                { name: "Minute (min)", value: "min" },
+                { name: "Hour (h)", value: "h" },
+                { name: "Day (d)", value: "d" },
+            ],
+        };
+
+        function populateUnits(type) {
+            fromUnitSelect.innerHTML = "";
+            toUnitSelect.innerHTML = "";
+            const selectedUnits = units[type];
+            selectedUnits.forEach((unit) => {
+                const option1 = document.createElement("option");
+                option1.value = unit.value;
+                option1.textContent = unit.name;
+                fromUnitSelect.appendChild(option1);
+
+                const option2 = document.createElement("option");
+                option2.value = unit.value;
+                option2.textContent = unit.name;
+                toUnitSelect.appendChild(option2);
+            });
+        }
+
+        conversionTypeSelect.addEventListener("change", (event) => {
+            populateUnits(event.target.value);
+        });
+
+        populateUnits(conversionTypeSelect.value);
+
+        convertButton.addEventListener("click", () => {
+            const value = parseFloat(inputValueInput.value);
+            if (isNaN(value)) {
+                resultDiv.textContent = "Please enter a valid number.";
+                return;
+            }
+
+            const fromUnit = fromUnitSelect.value;
+            const toUnit = toUnitSelect.value;
+            const type = conversionTypeSelect.value;
+
+            let result;
+            switch (type) {
+                case "speed":
+                    result = convertSpeed(value, fromUnit, toUnit);
+                    break;
+                case "area":
+                    result = convertArea(value, fromUnit, toUnit);
+                    break;
+                case "distance":
+                    result = convertDistance(value, fromUnit, toUnit);
+                    break;
+                case "time":
+                    result = convertTime(value, fromUnit, toUnit);
+                    break;
+            }
+            resultDiv.textContent = `${value} ${fromUnit} = ${result.toFixed(2)} ${toUnit}`;
+        });
+
+        function convertSpeed(value, fromUnit, toUnit) {
+            let metersPerSecond = value;
+            if (fromUnit === "km/h") {
+                metersPerSecond = value / 3.6;
+            } else if (fromUnit === "mph") {
+                metersPerSecond = value * 0.44704;
+            } else if (fromUnit === "kn") {
+                metersPerSecond = value * 0.514444;
+            }
+
+            let result = metersPerSecond;
+            if (toUnit === "km/h") {
+                result = metersPerSecond * 3.6;
+            } else if (toUnit === "mph") {
+                result = metersPerSecond / 0.44704;
+            } else if (toUnit === "kn") {
+                result = metersPerSecond / 0.514444;
+            }
+            return result;
+        }
+
+        function convertArea(value, fromUnit, toUnit) {
+            let squareMeters = value;
+            if (fromUnit === "km²") {
+                squareMeters = value * 1000000;
+            } else if (fromUnit === "mi²") {
+                squareMeters = value * 2589988.110336;
+            } else if (fromUnit === "ha") {
+                squareMeters = value * 10000;
+            } else if (fromUnit === "ac") {
+                squareMeters = value * 4046.8564224;
+            }
+
+            let result = squareMeters;
+             if (toUnit === "km²") {
+                result = squareMeters / 1000000;
+            } else if (toUnit === "mi²") {
+                result = squareMeters / 2589988.110336;
+            } else if (toUnit === "ha") {
+                result = squareMeters / 10000;
+            } else if (toUnit === "ac") {
+                result = squareMeters / 4046.8564224;
+            }
+            return result;
+        }
+
+        function convertDistance(value, fromUnit, toUnit) {
+            let meters = value;
+            if (fromUnit === "km") {
+                meters = value * 1000;
+            } else if (fromUnit === "mi") {
+                meters = value * 1609.34;
+            } else if (fromUnit === "cm") {
+                meters = value / 100;
+            } else if (fromUnit === "mm") {
+                meters = value / 1000;
+            }
+
+            let result = meters;
+            if (toUnit === "km") {
+                result = meters / 1000;
+            } else if (toUnit === "mi") {
+                result = meters / 1609.34;
+            } else if (toUnit === "cm") {
+                result = meters * 100;
+            } else if (toUnit === "mm") {
+                result = meters * 1000;
+            }
+            return result;
+        }
+
+        function convertTime(value, fromUnit, toUnit) {
+            let seconds = value;
+            if (fromUnit === "min") {
+                seconds = value * 60;
+            } else if (fromUnit === "h") {
+                seconds = value * 3600;
+            } else if (fromUnit === "d") {
+                seconds = value * 86400;
+            }
+
+            let result = seconds;
+            if (toUnit === "min") {
+                result = seconds / 60;
+            } else if (toUnit === "h") {
+                result = seconds / 3600;
+            } else if (toUnit === "d") {
+                result = seconds / 86400;
+            }
+            return result;
+        }
+    </script>
+</body>
+</html>
